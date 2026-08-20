@@ -1,0 +1,159 @@
+Microsoft Windows [Version 10.0.26200.8973]
+(c) Microsoft Corporation. All rights reserved.
+
+C:\Users\user>cd c:\xampp\mysql\bin
+
+c:\xampp\mysql\bin>mysql -u root -p
+Enter password:
+Welcome to the MariaDB monitor.  Commands end with ; or \g.
+Your MariaDB connection id is 10
+Server version: 10.4.32-MariaDB mariadb.org binary distribution
+
+Copyright (c) 2000, 2018, Oracle, MariaDB Corporation Ab and others.
+
+Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+
+MariaDB [(none)]> CREATE DATABASE db_pengukuran_kadar_air;
+ERROR 1007 (HY000): Can't create database 'db_pengukuran_kadar_air'; database exists
+MariaDB [(none)]> USE db_pengukuran_kadar_air;
+Database changed
+MariaDB [db_pengukuran_kadar_air]> CREATE TABLE pengguna(
+    -> id_user INT AUTO_INCREMENT PRIMARY KEY,
+    -> nama VARCHAR(100),
+    -> jabatan VARCHAR(50)
+    -> );
+ERROR 1050 (42S01): Table 'pengguna' already exists
+MariaDB [db_pengukuran_kadar_air]> CREATE TABLE sampel(
+    -> id_sampel INT AUTO_INCREMENT PRIMARY KEY,
+    -> kode_sampel VARCHAR(20),
+    -> nama_sampel VARCHAR(100),
+    -> jenis VARCHAR(50)
+    -> );
+ERROR 1050 (42S01): Table 'sampel' already exists
+MariaDB [db_pengukuran_kadar_air]> CREATE TABLE alat_ukur(
+    -> id_alat INT AUTO_INCREMENT PRIMARY KEY,
+    -> nama_alat VARCHAR(100),
+    -> merk VARCHAR(50)
+    -> );
+ERROR 1050 (42S01): Table 'alat_ukur' already exists
+MariaDB [db_pengukuran_kadar_air]> CREATE TABLE pengukuran(
+    -> id_pengukuran INT AUTO_INCREMENT PRIMARY KEY,
+    -> id_sampel INT,
+    -> id_user INT,
+    -> id_alat INT,
+    -> tanggal DATE,
+    -> kadar_air DECIMAL(5,2),
+    -> status VARCHAR(30),
+    -> FOREIGN KEY(id_sampel)
+    -> REFERENCES sampel(id_sampel),
+    -> FOREIGN KEY(id_user)
+    -> REFERENCES pengguna(id_user),
+    -> FOREIGN KEY(id_alat)
+    -> REFERENCES alat_ukur(id_alat)
+    -> );
+ERROR 1050 (42S01): Table 'pengukuran' already exists
+MariaDB [db_pengukuran_kadar_air]> INSERT INTO pengguna(nama,jabatan)VALUES
+    -> ('Adinda','Operator'),
+    -> ('Zahira','Teknisi'),
+    -> ('Siti','Admin');
+Query OK, 3 rows affected (0.006 sec)
+Records: 3  Duplicates: 0  Warnings: 0
+
+MariaDB [db_pengukuran_kadar_air]> INSERT INTO sampel (kode_sampel,nama_sampel,jenis) VALUES
+    -> ('S001','Jagung','Pertanian'),
+    -> ('S002','Padi','Pertanian'),
+    -> ('S003','Kopi','Perkebunan');
+Query OK, 3 rows affected (0.006 sec)
+Records: 3  Duplicates: 0  Warnings: 0
+
+MariaDB [db_pengukuran_kadar_air]> INSERT INTO alat_ukur (nama_alat,merk)VALUES
+    -> ('Moisture Meter','Digital Pro'),
+    -> ('Pengukur Kadar Air','Testo');
+Query OK, 2 rows affected (0.003 sec)
+Records: 2  Duplicates: 0  Warnings: 0
+
+MariaDB [db_pengukuran_kadar_air]> INSERT INTO pengukuran
+    -> (id_sampel,id_user,id_alat,tanggal,kadar_air,status)
+    -> VALUES
+    -> (1,1,1,'2026-08-06',13.50,'Normal'),
+    -> (2,2,1,'2026-08-06',18.20,'Tinggi'),
+    -> (3,1,2,'2026-08-06',11.70,'Normal');
+Query OK, 3 rows affected (0.007 sec)
+Records: 3  Duplicates: 0  Warnings: 0
+
+MariaDB [db_pengukuran_kadar_air]> SHOW TABLES;
++-----------------------------------+
+| Tables_in_db_pengukuran_kadar_air |
++-----------------------------------+
+| alat_ukur                         |
+| pengguna                          |
+| pengukuran                        |
+| sampel                            |
++-----------------------------------+
+4 rows in set (0.001 sec)
+
+MariaDB [db_pengukuran_kadar_air]> SELECT * FROM pengukuran;
++---------------+-----------+---------+---------+------------+-----------+--------+
+| id_pengukuran | id_sampel | id_user | id_alat | tanggal    | kadar_air | status |
++---------------+-----------+---------+---------+------------+-----------+--------+
+|             1 |         1 |       1 |       1 | 2026-08-06 |     13.50 | Normal |
+|             2 |         2 |       2 |       1 | 2026-08-06 |     18.20 | Tinggi |
+|             3 |         3 |       1 |       2 | 2026-08-06 |     11.70 | Normal |
++---------------+-----------+---------+---------+------------+-----------+--------+
+3 rows in set (0.001 sec)
+
+MariaDB [db_pengukuran_kadar_air]> SELECT
+    -> pengukuran.id_pengukuran,
+    -> sampel.nama_sampel,
+    -> pengguna.nama AS operator,
+    -> alat_ukur.nama_alat,
+    -> pengukuran.tanggal,
+    -> pengukuran.kadar_air,
+    -> pengukuran.status
+    -> FROM pengukuran
+    -> JOIN sampel
+    -> ON pengukuran.id_sampel=sampel.id_sampel
+    -> JOIN pengguna
+    -> ON pengukuran.id_user=pengguna.id_user
+    -> JOIN alat_ukur
+    -> ON pengukuran.id_alat=alat_ukur.id_alat;
++---------------+-------------+----------+--------------------+------------+-----------+--------+
+| id_pengukuran | nama_sampel | operator | nama_alat          | tanggal    | kadar_air | status |
++---------------+-------------+----------+--------------------+------------+-----------+--------+
+|             1 | Jagung      | Adinda   | Moisture Meter     | 2026-08-06 |     13.50 | Normal |
+|             2 | Padi        | Zahira   | Moisture Meter     | 2026-08-06 |     18.20 | Tinggi |
+|             3 | Kopi        | Siti     | Pengukur Kadar Air | 2026-08-06 |     11.70 | Normal |
++---------------+-------------+----------+--------------------+------------+-----------+--------+
+3 rows in set (0.008 sec)
+
+MariaDB [db_pengukuran_kadar_air]> SELECT *
+    -> FROM pengukuran
+    -> WHERE kadar_air > 15;
++---------------+-----------+---------+---------+------------+-----------+--------+
+| id_pengukuran | id_sampel | id_user | id_alat | tanggal    | kadar_air | status |
++---------------+-----------+---------+---------+------------+-----------+--------+
+|             2 |         2 |       2 |       1 | 2026-08-06 |     18.20 | Tinggi |
++---------------+-----------+---------+---------+------------+-----------+--------+
+1 row in set (0.005 sec)
+
+MariaDB [db_pengukuran_kadar_air]> SELECT COUNT(*)
+    -> AS jumlah_data
+    -> FROM pengukuran;
++-------------+
+| jumlah_data |
++-------------+
+|           3 |
++-------------+
+1 row in set (0.006 sec)
+
+MariaDB [db_pengukuran_kadar_air]> UPDATE pengukuran
+    -> SET status='Aman'
+    -> WHERE id_pengukuran=1;
+Query OK, 1 row affected (0.007 sec)
+Rows matched: 1  Changed: 1  Warnings: 0
+
+MariaDB [db_pengukuran_kadar_air]> DELETE FROM pengukuran
+    -> WHERE id_pengukuran=3;
+Query OK, 1 row affected (0.006 sec)
+
+MariaDB [db_pengukuran_kadar_air]>
